@@ -235,17 +235,24 @@ jobs:
 
       - name: Rename APKs with version
         run: |
-          mv app/build/outputs/apk/${{ env.VARIANT_FLAVOR }}/${{ env.VARIANT_TYPE }}/*.apk aaps-${{ env.VERSION }}${{ env.VERSION_SUFFIX }}.apk
-          mv wear/build/outputs/apk/${{ env.VARIANT_FLAVOR }}/${{ env.VARIANT_TYPE }}/*.apk aaps-wear-${{ env.VERSION }}${{ env.VERSION_SUFFIX }}.apk
+          mv app/build/outputs/apk/${{ env.VARIANT_FLAVOR }}/${{ env.VARIANT_TYPE }}/*.apk aaps-${{ env.VERSION }}{{ env.VERSION_SUFFIX }}.apk
+          mv wear/build/outputs/apk/${{ env.VARIANT_FLAVOR }}/${{ env.VARIANT_TYPE }}/*.apk aaps-wear-${{ env.VERSION }}{{ env.VERSION_SUFFIX }}.apk
 
-  cleanup:
-    name: Cleanup Old Workflow Runs
-    needs: build
-    if: always()
-    permissions:
-      actions: write
-    uses: ./.github/workflows/cleanup-workflow-runs.yml
-    with:
-      workflow_name: 'AAPS CI'
-      keep_runs: 20
-      keep_threshold: 5
+      - name: Upload APK Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: aaps-apk-${{ env.VERSION }}{{ env.VERSION_SUFFIX }}
+          path: |
+            aaps-*.apk
+
+cleanup:
+  name: Cleanup Old Workflow Runs
+  needs: build
+  if: always()
+  permissions:
+    actions: write
+  uses: ./.github/workflows/cleanup-workflow-runs.yml
+  with:
+    workflow_name: 'AAPS CI'
+    keep_runs: 20
+    keep_threshold: 5
