@@ -232,7 +232,7 @@ jobs:
       - name: Upload APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: aaps-apk-${{ env.VERSION }}{{ env.VERSION_SUFFIX }}
+          name: aaps-apk-${{ env.VERSION }}-${{ env.VERSION_SUFFIX }}
           path: |
             aaps-*.apk
 
