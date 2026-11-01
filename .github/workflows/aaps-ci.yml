@@ -107,7 +107,6 @@ jobs:
             fi
           }
 
-          # Check secrets
           check_secret "$KEYSTORE_BASE64" "KEYSTORE_BASE64"
           check_secret "$KEYSTORE_PASSWORD" "KEYSTORE_PASSWORD"
           check_secret "$KEY_ALIAS" "KEY_ALIAS"
@@ -129,13 +128,10 @@ jobs:
         run: |
           set -x
           echo "🔐 Validating keystore, alias and password"
-
-          # Create a dummy JAR file (quick method using zip)
           echo "test" > dummy.txt
           zip -q dummy.jar dummy.txt
           rm dummy.txt
 
-          # Attempt to validate using jarsigner
           JARSIGNER_LOG=$(mktemp)
           if ! jarsigner \
               -keystore "$RUNNER_TEMP/keystore/keystore.jks" \
@@ -151,9 +147,6 @@ jobs:
           rm -f "$JARSIGNER_LOG" dummy.jar
           echo "✅ Keystore, alias, and key password are valid."
 
-          rm -f "$KEYTOOL_LOG"
-          echo "✅ Keystore and credentials validated."
-
       - name: Checkout source code at tag
         uses: actions/checkout@v5
         with:
@@ -167,8 +160,6 @@ jobs:
 
       - name: Determine JVM version from tag
         run: |
-          # jdk-map.json must be read before switching to the upstream tag,
-          # as the upstream tag does not contain this file.
           TAG="${{ github.event.inputs.tagName }}"
           JAVA_VERSION=$(jq -r '.default' .github/jdk-map.json)
           while IFS=$'\t' read -r pattern jdk; do
@@ -235,8 +226,8 @@ jobs:
 
       - name: Rename APKs with version
         run: |
-          mv app/build/outputs/apk/${{ env.VARIANT_FLAVOR }}/${{ env.VARIANT_TYPE }}/*.apk aaps-${{ env.VERSION }}{{ env.VERSION_SUFFIX }}.apk
-          mv wear/build/outputs/apk/${{ env.VARIANT_FLAVOR }}/${{ env.VARIANT_TYPE }}/*.apk aaps-wear-${{ env.VERSION }}{{ env.VERSION_SUFFIX }}.apk
+          mv app/build/outputs/apk/$VARIANT_FLAVOR/$VARIANT_TYPE/*.apk aaps-$VERSION$VERSION_SUFFIX.apk
+          mv wear/build/outputs/apk/$VARIANT_FLAVOR/$VARIANT_TYPE/*.apk aaps-wear-$VERSION$VERSION_SUFFIX.apk
 
       - name: Upload APK Artifacts
         uses: actions/upload-artifact@v4
